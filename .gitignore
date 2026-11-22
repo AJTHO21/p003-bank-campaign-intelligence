@@ -1,0 +1,23 @@
+__pycache__/
+data/raw/*
+!data/raw/.gitkeep
+reports/profile.json
+
+.env
+.env.*
+.pgpass
+*.dump
+*.backup
+*.sql.gz
+reports/postgresql-qa*.log
+
+data/reporting/
+
+# P003 Power BI local-only artifacts
+powerbi/private_csv/
+powerbi/.sync/
+powerbi/.p003-build-stage/
+powerbi/.p003-csv-stage/
+.pbi/
+*.pbix
+*.pbit

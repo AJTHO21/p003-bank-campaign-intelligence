@@ -1,0 +1,53 @@
+table previous_outcome
+	lineageTag: 1ad20ffb-32c9-5e3d-bbdf-6065956ef703
+
+	measure 'previous_outcome observed rate' = DIVIDE(SUM(previous_outcome[numerator]), SUM(previous_outcome[denominator]))
+		formatString: 0.00%
+		lineageTag: 3126baa3-04ac-5155-998e-095038c00bea
+
+	column source_sha256
+		dataType: string
+		lineageTag: 85d8c467-e05d-54bf-be74-74e96010dad4
+		summarizeBy: none
+		sourceColumn: source_sha256
+
+	column poutcome
+		dataType: string
+		lineageTag: 2c5dd074-33b8-51e1-964a-191d4adc202b
+		summarizeBy: none
+		sourceColumn: poutcome
+
+	column numerator
+		dataType: int64
+		lineageTag: c2c5b707-493a-5bc4-84ad-a9f1a52316b1
+		summarizeBy: none
+		sourceColumn: numerator
+
+	column denominator
+		dataType: int64
+		lineageTag: b05a91ee-6367-58cd-9370-8719536acab3
+		summarizeBy: none
+		sourceColumn: denominator
+
+	column rate
+		dataType: double
+		lineageTag: e6336fb5-b23f-59f2-9673-368d899c2daf
+		summarizeBy: none
+		sourceColumn: rate
+
+	partition previous_outcome = m
+		mode: import
+		source =
+				let
+				    Parsed = Csv.Document(File.Contents(P003CsvFolder & "\previous_outcome.csv"), [Delimiter=",", Encoding=65001, QuoteStyle=QuoteStyle.Csv]),
+				    Headers = Table.PromoteHeaders(Parsed, [PromoteAllScalars=true]),
+				    Expected = {"source_sha256", "poutcome", "numerator", "denominator", "rate"},
+				    Checked = if Table.ColumnNames(Headers) = Expected then Headers else error "Unexpected P003 CSV headers",
+				    Nullable = {"rate"},
+				    Blanks = if List.IsEmpty(Nullable) then Checked else Table.ReplaceValue(Checked, "", null, Replacer.ReplaceValue, Nullable),
+				    Typed = Table.TransformColumnTypes(Blanks, {{"source_sha256", type text}, {"poutcome", type text}, {"numerator", Int64.Type}, {"denominator", Int64.Type}, {"rate", type number}}, "en-US"),
+				    Verified = if Table.RowCount(Typed) = 3 then Typed else error "Unexpected P003 CSV row count"
+				in
+				    Verified
+
+	annotation PBI_ResultType = Table

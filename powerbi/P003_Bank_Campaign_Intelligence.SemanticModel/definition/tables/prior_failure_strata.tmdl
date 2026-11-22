@@ -1,0 +1,85 @@
+table prior_failure_strata
+	lineageTag: 44e54cf7-97a3-5250-b8e0-6b85a7820cc3
+
+	column source_sha256
+		dataType: string
+		lineageTag: a6a0b86e-4494-5c2b-8295-c3e3db673fa2
+		summarizeBy: none
+		sourceColumn: source_sha256
+
+	column dimension
+		dataType: string
+		lineageTag: 556186a7-1494-5164-a652-34c2a8473c7f
+		summarizeBy: none
+		sourceColumn: dimension
+
+	column stratum
+		dataType: string
+		lineageTag: 65468cbe-f0e5-54d2-b369-2cbd2ab75146
+		summarizeBy: none
+		sourceColumn: stratum
+
+	column a_yes
+		dataType: int64
+		lineageTag: 8964162c-364c-56bc-9801-71b33bb27db2
+		summarizeBy: none
+		sourceColumn: a_yes
+
+	column a_n
+		dataType: int64
+		lineageTag: c483dbfc-f8f7-5b26-afb3-4c8b3af1e0bf
+		summarizeBy: none
+		sourceColumn: a_n
+
+	column b_yes
+		dataType: int64
+		lineageTag: 2508e357-f120-57ae-9674-4ec9de4c8556
+		summarizeBy: none
+		sourceColumn: b_yes
+
+	column b_n
+		dataType: int64
+		lineageTag: eff50d5f-2faa-59ab-8cbf-3188ac4441da
+		summarizeBy: none
+		sourceColumn: b_n
+
+	column a_rate
+		dataType: double
+		lineageTag: d88258ab-cf6a-584a-bbd0-26e4ee4eac9f
+		summarizeBy: none
+		sourceColumn: a_rate
+
+	column b_rate
+		dataType: double
+		lineageTag: 38317170-b0ff-5c68-a43c-7ca2cdb96117
+		summarizeBy: none
+		sourceColumn: b_rate
+
+	column gap_pp
+		dataType: double
+		lineageTag: 1f20b97d-de45-5536-85b4-5c69f2b3b3bc
+		summarizeBy: none
+		sourceColumn: gap_pp
+
+	column sparse
+		dataType: boolean
+		lineageTag: 1f489117-b925-5518-a30c-2b358a28d4b8
+		summarizeBy: none
+		sourceColumn: sparse
+
+	partition prior_failure_strata = m
+		mode: import
+		source =
+				let
+				    Parsed = Csv.Document(File.Contents(P003CsvFolder & "\prior_failure_strata.csv"), [Delimiter=",", Encoding=65001, QuoteStyle=QuoteStyle.Csv]),
+				    Headers = Table.PromoteHeaders(Parsed, [PromoteAllScalars=true]),
+				    Expected = {"source_sha256", "dimension", "stratum", "a_yes", "a_n", "b_yes", "b_n", "a_rate", "b_rate", "gap_pp", "sparse"},
+				    Checked = if Table.ColumnNames(Headers) = Expected then Headers else error "Unexpected P003 CSV headers",
+				    Nullable = {"a_rate", "b_rate", "gap_pp"},
+				    Blanks = if List.IsEmpty(Nullable) then Checked else Table.ReplaceValue(Checked, "", null, Replacer.ReplaceValue, Nullable),
+				    Typed = Table.TransformColumnTypes(Blanks, {{"source_sha256", type text}, {"dimension", type text}, {"stratum", type text}, {"a_yes", Int64.Type}, {"a_n", Int64.Type}, {"b_yes", Int64.Type}, {"b_n", Int64.Type}, {"a_rate", type number}, {"b_rate", type number}, {"gap_pp", type number}, {"sparse", type logical}}, "en-US"),
+				    Verified = if Table.RowCount(Typed) = 16 then Typed else error "Unexpected P003 CSV row count"
+				in
+				    Verified
+
+	annotation PBI_ResultType = Table

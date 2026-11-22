@@ -1,0 +1,117 @@
+table comparison_estimates
+	lineageTag: 5b831b1e-a692-5221-8623-5fc43dd0496a
+
+	measure 'comparison_estimates a_rate' = IF(COUNTROWS(comparison_estimates) = 1, SELECTEDVALUE(comparison_estimates[a_rate]))
+		formatString: 0.00%
+		lineageTag: 636b51db-e490-54b5-a820-416d029311e2
+
+	measure 'comparison_estimates b_rate' = IF(COUNTROWS(comparison_estimates) = 1, SELECTEDVALUE(comparison_estimates[b_rate]))
+		formatString: 0.00%
+		lineageTag: f55c40d3-b56a-5e14-ac2d-d999dba00e1b
+
+	column source_sha256
+		dataType: string
+		lineageTag: 49d3a56a-9638-5e3d-9393-48c77c4817ee
+		summarizeBy: none
+		sourceColumn: source_sha256
+
+	column family
+		dataType: string
+		lineageTag: 3f57d3f9-ab63-5ccc-9f25-c1e9645bfae6
+		summarizeBy: none
+		sourceColumn: family
+
+	column method
+		dataType: string
+		lineageTag: 370b36b7-6e7a-5259-8be5-b6b44c72955d
+		summarizeBy: none
+		sourceColumn: method
+
+	column estimate_type
+		dataType: string
+		lineageTag: 7e05fca7-1db1-5b17-a4f1-47a7b8462fee
+		summarizeBy: none
+		sourceColumn: estimate_type
+
+	column a_yes
+		dataType: int64
+		lineageTag: 14638c05-f515-5748-bb3c-0bc451399434
+		summarizeBy: none
+		sourceColumn: a_yes
+
+	column a_n
+		dataType: int64
+		lineageTag: 50542264-b329-5579-9f54-c333fc5e8690
+		summarizeBy: none
+		sourceColumn: a_n
+
+	column b_yes
+		dataType: int64
+		lineageTag: 3905df5d-7ef8-5713-b33c-fd3d03764f08
+		summarizeBy: none
+		sourceColumn: b_yes
+
+	column b_n
+		dataType: int64
+		lineageTag: e8afcecb-45e8-52c1-8a59-dc0ccb9c5e14
+		summarizeBy: none
+		sourceColumn: b_n
+
+	column a_rate
+		dataType: double
+		lineageTag: 5f07bfda-7031-5ab7-9e12-1e3ca8a6776f
+		summarizeBy: none
+		sourceColumn: a_rate
+
+	column b_rate
+		dataType: double
+		lineageTag: 4161ab59-84b9-57fd-9534-243b32e6d418
+		summarizeBy: none
+		sourceColumn: b_rate
+
+	column included_strata
+		dataType: int64
+		lineageTag: d863491b-ce23-5e1a-8e34-30e089bef0c8
+		summarizeBy: none
+		sourceColumn: included_strata
+
+	column gap_pp
+		dataType: double
+		lineageTag: 876be737-89ef-55d2-8b12-09c7a418687f
+		summarizeBy: none
+		sourceColumn: gap_pp
+
+	column weighted_a_numerator
+		dataType: double
+		lineageTag: 6cb315e2-834d-59bc-9ddc-34d412394ce8
+		summarizeBy: none
+		sourceColumn: weighted_a_numerator
+
+	column weighted_b_numerator
+		dataType: double
+		lineageTag: 41e3d045-f7fe-5471-8677-3adf46aea8da
+		summarizeBy: none
+		sourceColumn: weighted_b_numerator
+
+	column weighted_denominator
+		dataType: int64
+		lineageTag: f3eb6078-ca71-597c-85ac-c4420b7a7508
+		summarizeBy: none
+		sourceColumn: weighted_denominator
+
+	partition comparison_estimates = m
+		mode: import
+		source =
+				let
+				    Parsed = Csv.Document(File.Contents(P003CsvFolder & "\comparison_estimates.csv"), [Delimiter=",", Encoding=65001, QuoteStyle=QuoteStyle.Csv]),
+				    Headers = Table.PromoteHeaders(Parsed, [PromoteAllScalars=true]),
+				    Expected = {"source_sha256", "family", "method", "estimate_type", "a_yes", "a_n", "b_yes", "b_n", "a_rate", "b_rate", "included_strata", "gap_pp", "weighted_a_numerator", "weighted_b_numerator", "weighted_denominator"},
+				    Checked = if Table.ColumnNames(Headers) = Expected then Headers else error "Unexpected P003 CSV headers",
+				    Nullable = {"a_rate", "b_rate", "included_strata", "weighted_a_numerator", "weighted_b_numerator", "weighted_denominator"},
+				    Blanks = if List.IsEmpty(Nullable) then Checked else Table.ReplaceValue(Checked, "", null, Replacer.ReplaceValue, Nullable),
+				    Typed = Table.TransformColumnTypes(Blanks, {{"source_sha256", type text}, {"family", type text}, {"method", type text}, {"estimate_type", type text}, {"a_yes", Int64.Type}, {"a_n", Int64.Type}, {"b_yes", Int64.Type}, {"b_n", Int64.Type}, {"a_rate", type number}, {"b_rate", type number}, {"included_strata", Int64.Type}, {"gap_pp", type number}, {"weighted_a_numerator", type number}, {"weighted_b_numerator", type number}, {"weighted_denominator", Int64.Type}}, "en-US"),
+				    Verified = if Table.RowCount(Typed) = 7 then Typed else error "Unexpected P003 CSV row count"
+				in
+				    Verified
+
+	annotation PBI_ResultType = Table

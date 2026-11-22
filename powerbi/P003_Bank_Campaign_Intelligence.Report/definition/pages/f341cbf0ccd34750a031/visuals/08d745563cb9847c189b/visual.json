@@ -1,0 +1,98 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.9.0/schema.json",
+  "name": "08d745563cb9847c189b",
+  "position": {
+    "x": 48,
+    "y": 804,
+    "width": 1824,
+    "height": 166,
+    "z": 9000,
+    "tabOrder": 9000
+  },
+  "visual": {
+    "visualType": "textbox",
+    "objects": {
+      "general": [
+        {
+          "properties": {
+            "paragraphs": [
+              {
+                "textRuns": [
+                  {
+                    "value": "Executive interpretation",
+                    "textStyle": {
+                      "fontFamily": "Segoe UI",
+                      "fontSize": "29px",
+                      "color": "#14283F",
+                      "fontWeight": "bold"
+                    }
+                  }
+                ],
+                "horizontalTextAlignment": "left"
+              },
+              {
+                "textRuns": [
+                  {
+                    "value": "Cellular had both higher volume and a higher observed subscription rate. Previous success had the highest observed rate, across 1,373 observations.",
+                    "textStyle": {
+                      "fontFamily": "Segoe UI",
+                      "fontSize": "21px",
+                      "color": "#14283F"
+                    }
+                  }
+                ],
+                "horizontalTextAlignment": "left"
+              },
+              {
+                "textRuns": [
+                  {
+                    "value": "Nonexistent means no recorded prior outcome. Observed differences do not establish causation.",
+                    "textStyle": {
+                      "fontFamily": "Segoe UI",
+                      "fontSize": "21px",
+                      "color": "#14283F"
+                    }
+                  }
+                ],
+                "horizontalTextAlignment": "left"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "visualContainerObjects": {
+      "background": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "color": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#FFFFFF'"
+                    }
+                  }
+                }
+              }
+            },
+            "transparency": {
+              "expr": {
+                "Literal": {
+                  "Value": "0D"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,3 @@
+expression P003CsvFolder = "SET_P003_CSV_FOLDER" meta [IsParameterQuery=true, Type="Text", IsParameterQueryRequired=true]
+
+	annotation PBI_ResultType = Text

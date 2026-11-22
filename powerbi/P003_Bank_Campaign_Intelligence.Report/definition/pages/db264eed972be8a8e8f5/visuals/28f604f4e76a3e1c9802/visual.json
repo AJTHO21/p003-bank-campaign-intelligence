@@ -1,0 +1,111 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.9.0/schema.json",
+  "name": "28f604f4e76a3e1c9802",
+  "position": {
+    "x": 48,
+    "y": 920,
+    "width": 1362,
+    "height": 124,
+    "z": 9000,
+    "tabOrder": 9000
+  },
+  "visual": {
+    "visualType": "textbox",
+    "objects": {
+      "general": [
+        {
+          "properties": {
+            "paragraphs": [
+              {
+                "textRuns": [
+                  {
+                    "value": "How to read the channel gaps",
+                    "textStyle": {
+                      "fontFamily": "Segoe UI",
+                      "fontSize": "24px",
+                      "color": "#14283F",
+                      "fontWeight": "bold"
+                    }
+                  }
+                ],
+                "horizontalTextAlignment": "left"
+              },
+              {
+                "textRuns": [
+                  {
+                    "value": "The gaps compare cellular minus telephone. Standardized gaps apply shared prior-outcome or supported-month mixes.",
+                    "textStyle": {
+                      "fontFamily": "Segoe UI",
+                      "fontSize": "17px",
+                      "color": "#14283F"
+                    }
+                  }
+                ],
+                "horizontalTextAlignment": "left"
+              },
+              {
+                "textRuns": [
+                  {
+                    "value": "December is excluded from month standardization for both channels: 149 cellular + 33 telephone = 182 observations.",
+                    "textStyle": {
+                      "fontFamily": "Segoe UI",
+                      "fontSize": "17px",
+                      "color": "#14283F"
+                    }
+                  }
+                ],
+                "horizontalTextAlignment": "left"
+              },
+              {
+                "textRuns": [
+                  {
+                    "value": "These historical comparisons are descriptive and do not establish causal effects.",
+                    "textStyle": {
+                      "fontFamily": "Segoe UI",
+                      "fontSize": "17px",
+                      "color": "#14283F"
+                    }
+                  }
+                ],
+                "horizontalTextAlignment": "left"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "visualContainerObjects": {
+      "background": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "color": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Literal": {
+                      "Value": "'#FFFFFF'"
+                    }
+                  }
+                }
+              }
+            },
+            "transparency": {
+              "expr": {
+                "Literal": {
+                  "Value": "0D"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

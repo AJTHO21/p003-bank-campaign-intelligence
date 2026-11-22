@@ -1,0 +1,71 @@
+table campaign_frequency
+	lineageTag: 955b3644-bfa2-5e5c-8abb-1c320b442621
+
+	measure 'campaign_frequency observed rate' = DIVIDE(SUM(campaign_frequency[numerator]), SUM(campaign_frequency[denominator]))
+		formatString: 0.00%
+		lineageTag: 37931fdf-cfb4-50bd-94f0-3276ab2333cc
+
+	column source_sha256
+		dataType: string
+		lineageTag: c2ca5e3d-ebb0-5093-a745-ba20acd20448
+		summarizeBy: none
+		sourceColumn: source_sha256
+
+	column campaign
+		dataType: int64
+		lineageTag: eee18676-4f0d-51b1-b9a4-324dafa9e2b5
+		summarizeBy: none
+		sourceColumn: campaign
+
+	column numerator
+		dataType: int64
+		lineageTag: 78fa7c9a-e380-5f87-95cf-940812f55d63
+		summarizeBy: none
+		sourceColumn: numerator
+
+	column denominator
+		dataType: int64
+		lineageTag: 404d260d-056e-5b7f-836a-5ee54605aa99
+		summarizeBy: none
+		sourceColumn: denominator
+
+	column rate
+		dataType: double
+		lineageTag: 40598773-5153-58d9-a7e4-0b1470c63530
+		summarizeBy: none
+		sourceColumn: rate
+
+	column frequency_numerator
+		dataType: int64
+		lineageTag: 1b02bf47-acc5-53d3-a736-b98f3f1310e9
+		summarizeBy: none
+		sourceColumn: frequency_numerator
+
+	column frequency_denominator
+		dataType: int64
+		lineageTag: 6518fca6-5f72-569c-8d2a-3da80cf9ea88
+		summarizeBy: none
+		sourceColumn: frequency_denominator
+
+	column observation_share
+		dataType: double
+		lineageTag: d552bae0-9aad-53be-a186-c1f3ec677c1e
+		summarizeBy: none
+		sourceColumn: observation_share
+
+	partition campaign_frequency = m
+		mode: import
+		source =
+				let
+				    Parsed = Csv.Document(File.Contents(P003CsvFolder & "\campaign_frequency.csv"), [Delimiter=",", Encoding=65001, QuoteStyle=QuoteStyle.Csv]),
+				    Headers = Table.PromoteHeaders(Parsed, [PromoteAllScalars=true]),
+				    Expected = {"source_sha256", "campaign", "numerator", "denominator", "rate", "frequency_numerator", "frequency_denominator", "observation_share"},
+				    Checked = if Table.ColumnNames(Headers) = Expected then Headers else error "Unexpected P003 CSV headers",
+				    Nullable = {"rate"},
+				    Blanks = if List.IsEmpty(Nullable) then Checked else Table.ReplaceValue(Checked, "", null, Replacer.ReplaceValue, Nullable),
+				    Typed = Table.TransformColumnTypes(Blanks, {{"source_sha256", type text}, {"campaign", Int64.Type}, {"numerator", Int64.Type}, {"denominator", Int64.Type}, {"rate", type number}, {"frequency_numerator", Int64.Type}, {"frequency_denominator", Int64.Type}, {"observation_share", type number}}, "en-US"),
+				    Verified = if Table.RowCount(Typed) = 42 then Typed else error "Unexpected P003 CSV row count"
+				in
+				    Verified
+
+	annotation PBI_ResultType = Table

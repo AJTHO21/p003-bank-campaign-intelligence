@@ -1,0 +1,83 @@
+table segment_estimates
+	lineageTag: 0ce58190-468f-53c5-8d10-fd4cb664951b
+
+	measure 'segment_estimates adjusted_rate' = IF(COUNTROWS(segment_estimates) = 1, SELECTEDVALUE(segment_estimates[adjusted_rate]))
+		formatString: 0.00%
+		lineageTag: e09bf96f-f978-53d1-9d93-75ba19dbbb66
+
+	column source_sha256
+		dataType: string
+		lineageTag: 6631d0ba-33e4-517e-b5ed-ac915b328c8a
+		summarizeBy: none
+		sourceColumn: source_sha256
+
+	column dimension
+		dataType: string
+		lineageTag: 5563fe55-3377-529e-9f7e-595c9d64f572
+		summarizeBy: none
+		sourceColumn: dimension
+
+	column level
+		dataType: string
+		lineageTag: a3cce1b9-4ed5-548a-9ae9-a2b9e2892b62
+		summarizeBy: none
+		sourceColumn: level
+
+	column numerator
+		dataType: int64
+		lineageTag: ba538fe4-e93d-5458-9145-80d8b21a1a81
+		summarizeBy: none
+		sourceColumn: numerator
+
+	column denominator
+		dataType: int64
+		lineageTag: a339cce3-f1dd-5060-9dbb-1a04031d8c68
+		summarizeBy: none
+		sourceColumn: denominator
+
+	column adjusted_rate
+		dataType: double
+		lineageTag: 8678dd65-062b-53d8-926a-39a49e23ae0b
+		summarizeBy: none
+		sourceColumn: adjusted_rate
+
+	column gap_pp
+		dataType: double
+		lineageTag: a763c226-ada2-553b-9020-5eb9d8d22483
+		summarizeBy: none
+		sourceColumn: gap_pp
+
+	column sparse_strata
+		dataType: int64
+		lineageTag: f43b7735-6a26-540f-982f-cf78e3b326b1
+		summarizeBy: none
+		sourceColumn: sparse_strata
+
+	column weighted_numerator
+		dataType: double
+		lineageTag: d9c41159-bca5-5aaf-82fe-fa499b2f2246
+		summarizeBy: none
+		sourceColumn: weighted_numerator
+
+	column weighted_denominator
+		dataType: int64
+		lineageTag: c6e36f0b-e5e0-57f8-aa50-e1a8e9b9229b
+		summarizeBy: none
+		sourceColumn: weighted_denominator
+
+	partition segment_estimates = m
+		mode: import
+		source =
+				let
+				    Parsed = Csv.Document(File.Contents(P003CsvFolder & "\segment_estimates.csv"), [Delimiter=",", Encoding=65001, QuoteStyle=QuoteStyle.Csv]),
+				    Headers = Table.PromoteHeaders(Parsed, [PromoteAllScalars=true]),
+				    Expected = {"source_sha256", "dimension", "level", "numerator", "denominator", "adjusted_rate", "gap_pp", "sparse_strata", "weighted_numerator", "weighted_denominator"},
+				    Checked = if Table.ColumnNames(Headers) = Expected then Headers else error "Unexpected P003 CSV headers",
+				    Nullable = {"adjusted_rate", "gap_pp", "weighted_numerator", "weighted_denominator"},
+				    Blanks = if List.IsEmpty(Nullable) then Checked else Table.ReplaceValue(Checked, "", null, Replacer.ReplaceValue, Nullable),
+				    Typed = Table.TransformColumnTypes(Blanks, {{"source_sha256", type text}, {"dimension", type text}, {"level", type text}, {"numerator", Int64.Type}, {"denominator", Int64.Type}, {"adjusted_rate", type number}, {"gap_pp", type number}, {"sparse_strata", Int64.Type}, {"weighted_numerator", type number}, {"weighted_denominator", Int64.Type}}, "en-US"),
+				    Verified = if Table.RowCount(Typed) = 31 then Typed else error "Unexpected P003 CSV row count"
+				in
+				    Verified
+
+	annotation PBI_ResultType = Table

@@ -1,0 +1,89 @@
+table observed_segments
+	lineageTag: 9902c3d0-6d8c-5bb0-b2a4-2ae9ca06147a
+
+	measure 'observed_segments observed rate' = IF(HASONEVALUE(observed_segments[dimension]), DIVIDE(SUM(observed_segments[numerator]), SUM(observed_segments[denominator])))
+		formatString: 0.00%
+		lineageTag: e2eee6ca-8986-5b46-b3e5-f387cd91a7b0
+
+	column source_sha256
+		dataType: string
+		lineageTag: 1da4aea7-d7f9-5080-93e1-9c7920109eb6
+		summarizeBy: none
+		sourceColumn: source_sha256
+
+	column dimension
+		dataType: string
+		lineageTag: 929a1a60-c74c-5b64-afe8-ee697a4fe032
+		summarizeBy: none
+		sourceColumn: dimension
+
+	column level
+		dataType: string
+		lineageTag: e9fa9645-0201-5b6e-8153-2456cdcc74cf
+		summarizeBy: none
+		sourceColumn: level
+
+	column numerator
+		dataType: int64
+		lineageTag: 755baa5a-ecde-51b8-9301-3b00e1b1421e
+		summarizeBy: none
+		sourceColumn: numerator
+
+	column denominator
+		dataType: int64
+		lineageTag: edb6d8bc-84d0-5a8c-8085-339ca84b9a69
+		summarizeBy: none
+		sourceColumn: denominator
+
+	column rate
+		dataType: double
+		lineageTag: 2ace3b76-43c7-57e0-8ab4-7d3080695c7a
+		summarizeBy: none
+		sourceColumn: rate
+
+	column reference_pct
+		dataType: double
+		lineageTag: eb885fd6-f0f5-57eb-a4e6-dcea6948cc1e
+		summarizeBy: none
+		sourceColumn: reference_pct
+
+	column gap_pp
+		dataType: double
+		lineageTag: 052f8816-b636-53a9-a08c-d9bbedd71882
+		summarizeBy: none
+		sourceColumn: gap_pp
+
+	column wilson_low_pct
+		dataType: double
+		lineageTag: 7d23f5a7-2f33-51f0-8fb1-0d7b0f89ef62
+		summarizeBy: none
+		sourceColumn: wilson_low_pct
+
+	column wilson_high_pct
+		dataType: double
+		lineageTag: 5edd2c97-1d1e-582e-bbc7-e061910aa4f9
+		summarizeBy: none
+		sourceColumn: wilson_high_pct
+
+	column sparse
+		dataType: boolean
+		lineageTag: e013c736-db19-537e-99b2-36905e198799
+		summarizeBy: none
+		sourceColumn: sparse
+
+	partition observed_segments = m
+		mode: import
+		source =
+				let
+				    Parsed = Csv.Document(File.Contents(P003CsvFolder & "\observed_segments.csv"), [Delimiter=",", Encoding=65001, QuoteStyle=QuoteStyle.Csv]),
+				    Headers = Table.PromoteHeaders(Parsed, [PromoteAllScalars=true]),
+				    Expected = {"source_sha256", "dimension", "level", "numerator", "denominator", "rate", "reference_pct", "gap_pp", "wilson_low_pct", "wilson_high_pct", "sparse"},
+				    Checked = if Table.ColumnNames(Headers) = Expected then Headers else error "Unexpected P003 CSV headers",
+				    Nullable = {"rate", "gap_pp", "wilson_low_pct", "wilson_high_pct"},
+				    Blanks = if List.IsEmpty(Nullable) then Checked else Table.ReplaceValue(Checked, "", null, Replacer.ReplaceValue, Nullable),
+				    Typed = Table.TransformColumnTypes(Blanks, {{"source_sha256", type text}, {"dimension", type text}, {"level", type text}, {"numerator", Int64.Type}, {"denominator", Int64.Type}, {"rate", type number}, {"reference_pct", type number}, {"gap_pp", type number}, {"wilson_low_pct", type number}, {"wilson_high_pct", type number}, {"sparse", type logical}}, "en-US"),
+				    Verified = if Table.RowCount(Typed) = 48 then Typed else error "Unexpected P003 CSV row count"
+				in
+				    Verified
+
+	annotation PBI_ResultType = Table

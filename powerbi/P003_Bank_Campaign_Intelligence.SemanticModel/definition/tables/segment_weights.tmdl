@@ -1,0 +1,49 @@
+table segment_weights
+	lineageTag: 5fbdbe1a-5a90-56ef-a403-d572260aaa92
+
+	column source_sha256
+		dataType: string
+		lineageTag: 2f104308-b58a-5dd3-ac65-db17046539ce
+		summarizeBy: none
+		sourceColumn: source_sha256
+
+	column prior_outcome
+		dataType: string
+		lineageTag: 849b79f9-38cf-5c95-b263-7eb884c27030
+		summarizeBy: none
+		sourceColumn: prior_outcome
+
+	column weight_numerator
+		dataType: int64
+		lineageTag: 1653dfef-1d38-5cbf-9ca7-6f78cc24617f
+		summarizeBy: none
+		sourceColumn: weight_numerator
+
+	column weight_denominator
+		dataType: int64
+		lineageTag: bc2bbb44-6f9b-5a14-bb36-d0bc4649f6fa
+		summarizeBy: none
+		sourceColumn: weight_denominator
+
+	column weight
+		dataType: double
+		lineageTag: 4f5dd5f0-7771-52e0-9d80-bba7c8e5f4d1
+		summarizeBy: none
+		sourceColumn: weight
+
+	partition segment_weights = m
+		mode: import
+		source =
+				let
+				    Parsed = Csv.Document(File.Contents(P003CsvFolder & "\segment_weights.csv"), [Delimiter=",", Encoding=65001, QuoteStyle=QuoteStyle.Csv]),
+				    Headers = Table.PromoteHeaders(Parsed, [PromoteAllScalars=true]),
+				    Expected = {"source_sha256", "prior_outcome", "weight_numerator", "weight_denominator", "weight"},
+				    Checked = if Table.ColumnNames(Headers) = Expected then Headers else error "Unexpected P003 CSV headers",
+				    Nullable = {},
+				    Blanks = if List.IsEmpty(Nullable) then Checked else Table.ReplaceValue(Checked, "", null, Replacer.ReplaceValue, Nullable),
+				    Typed = Table.TransformColumnTypes(Blanks, {{"source_sha256", type text}, {"prior_outcome", type text}, {"weight_numerator", Int64.Type}, {"weight_denominator", Int64.Type}, {"weight", type number}}, "en-US"),
+				    Verified = if Table.RowCount(Typed) = 3 then Typed else error "Unexpected P003 CSV row count"
+				in
+				    Verified
+
+	annotation PBI_ResultType = Table

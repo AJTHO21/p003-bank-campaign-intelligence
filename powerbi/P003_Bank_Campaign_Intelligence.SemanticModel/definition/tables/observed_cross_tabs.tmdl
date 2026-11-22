@@ -1,0 +1,101 @@
+table observed_cross_tabs
+	lineageTag: 1a529ead-ca3b-5afa-8505-4b67b31b6bcb
+
+	measure 'observed_cross_tabs observed rate' = IF(HASONEVALUE(observed_cross_tabs[dimension]) && HASONEVALUE(observed_cross_tabs[stratum_type]), DIVIDE(SUM(observed_cross_tabs[numerator]), SUM(observed_cross_tabs[denominator])))
+		formatString: 0.00%
+		lineageTag: ec837824-3732-520f-8be7-ce5d2b0ecc36
+
+	column source_sha256
+		dataType: string
+		lineageTag: afee6208-bd06-576d-8e8d-1ab02768376c
+		summarizeBy: none
+		sourceColumn: source_sha256
+
+	column dimension
+		dataType: string
+		lineageTag: 6769f717-beb6-5ed9-afde-eed154e62897
+		summarizeBy: none
+		sourceColumn: dimension
+
+	column level
+		dataType: string
+		lineageTag: 01bf874d-9444-5353-ba36-03f33cbff081
+		summarizeBy: none
+		sourceColumn: level
+
+	column stratum_type
+		dataType: string
+		lineageTag: e8b3b1ca-13ae-5d2e-a6a7-20fadafc3f0e
+		summarizeBy: none
+		sourceColumn: stratum_type
+
+	column stratum
+		dataType: string
+		lineageTag: ae5ec3eb-4c14-5b09-9f31-aff3aaa3f828
+		summarizeBy: none
+		sourceColumn: stratum
+
+	column numerator
+		dataType: int64
+		lineageTag: d5d70b1f-3d41-5722-b02d-319c4fb69ba4
+		summarizeBy: none
+		sourceColumn: numerator
+
+	column denominator
+		dataType: int64
+		lineageTag: 3aa60ee1-1cc8-5414-863a-970cacb5e95c
+		summarizeBy: none
+		sourceColumn: denominator
+
+	column rate
+		dataType: double
+		lineageTag: 654b2908-3d40-5f1d-b4c4-9b4347e31ecc
+		summarizeBy: none
+		sourceColumn: rate
+
+	column reference_pct
+		dataType: double
+		lineageTag: d86dbf06-7a28-5a1c-ba54-cb39903a9d1a
+		summarizeBy: none
+		sourceColumn: reference_pct
+
+	column gap_pp
+		dataType: double
+		lineageTag: 577f6b47-3138-55e2-9ce9-c3712833f790
+		summarizeBy: none
+		sourceColumn: gap_pp
+
+	column wilson_low_pct
+		dataType: double
+		lineageTag: ddba41ab-39c9-57f5-a848-41daea5c7bb7
+		summarizeBy: none
+		sourceColumn: wilson_low_pct
+
+	column wilson_high_pct
+		dataType: double
+		lineageTag: 9763ed94-66fb-5798-bc1b-3950b52dec80
+		summarizeBy: none
+		sourceColumn: wilson_high_pct
+
+	column sparse
+		dataType: boolean
+		lineageTag: 7e47f3d9-cc8f-5db5-9958-72354d5655f5
+		summarizeBy: none
+		sourceColumn: sparse
+
+	partition observed_cross_tabs = m
+		mode: import
+		source =
+				let
+				    Parsed = Csv.Document(File.Contents(P003CsvFolder & "\observed_cross_tabs.csv"), [Delimiter=",", Encoding=65001, QuoteStyle=QuoteStyle.Csv]),
+				    Headers = Table.PromoteHeaders(Parsed, [PromoteAllScalars=true]),
+				    Expected = {"source_sha256", "dimension", "level", "stratum_type", "stratum", "numerator", "denominator", "rate", "reference_pct", "gap_pp", "wilson_low_pct", "wilson_high_pct", "sparse"},
+				    Checked = if Table.ColumnNames(Headers) = Expected then Headers else error "Unexpected P003 CSV headers",
+				    Nullable = {"rate", "gap_pp", "wilson_low_pct", "wilson_high_pct"},
+				    Blanks = if List.IsEmpty(Nullable) then Checked else Table.ReplaceValue(Checked, "", null, Replacer.ReplaceValue, Nullable),
+				    Typed = Table.TransformColumnTypes(Blanks, {{"source_sha256", type text}, {"dimension", type text}, {"level", type text}, {"stratum_type", type text}, {"stratum", type text}, {"numerator", Int64.Type}, {"denominator", Int64.Type}, {"rate", type number}, {"reference_pct", type number}, {"gap_pp", type number}, {"wilson_low_pct", type number}, {"wilson_high_pct", type number}, {"sparse", type logical}}, "en-US"),
+				    Verified = if Table.RowCount(Typed) = 119 then Typed else error "Unexpected P003 CSV row count"
+				in
+				    Verified
+
+	annotation PBI_ResultType = Table

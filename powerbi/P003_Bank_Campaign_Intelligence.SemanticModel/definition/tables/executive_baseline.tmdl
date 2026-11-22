@@ -1,0 +1,55 @@
+table executive_baseline
+	lineageTag: d6e4a8ba-8f7a-50c5-aca7-279105dbb90a
+
+	measure 'Observations' = SUM(executive_baseline[denominator])
+		formatString: #,0
+		lineageTag: b4eee5ee-8220-50aa-b5f0-3f72a616c02c
+
+	measure 'Subscriptions' = SUM(executive_baseline[numerator])
+		formatString: #,0
+		lineageTag: d261d07a-7239-57cf-9e87-7251da4eebcd
+
+	measure 'executive_baseline observed rate' = DIVIDE(SUM(executive_baseline[numerator]), SUM(executive_baseline[denominator]))
+		formatString: 0.00%
+		lineageTag: 9caefc44-4b96-592a-9116-acbda263d6e9
+
+	column source_sha256
+		dataType: string
+		lineageTag: 76dd879a-d474-53e2-88b0-8caa4589a3e1
+		summarizeBy: none
+		sourceColumn: source_sha256
+
+	column numerator
+		dataType: int64
+		lineageTag: cea5ae2a-0688-592d-a1b1-b84ce2f6583b
+		summarizeBy: none
+		sourceColumn: numerator
+
+	column denominator
+		dataType: int64
+		lineageTag: a6a8a07a-57dc-5fbb-bc5a-9e14d383b500
+		summarizeBy: none
+		sourceColumn: denominator
+
+	column rate
+		dataType: double
+		lineageTag: 7fb64998-3979-5bf0-b058-aa65fa1113aa
+		summarizeBy: none
+		sourceColumn: rate
+
+	partition executive_baseline = m
+		mode: import
+		source =
+				let
+				    Parsed = Csv.Document(File.Contents(P003CsvFolder & "\executive_baseline.csv"), [Delimiter=",", Encoding=65001, QuoteStyle=QuoteStyle.Csv]),
+				    Headers = Table.PromoteHeaders(Parsed, [PromoteAllScalars=true]),
+				    Expected = {"source_sha256", "numerator", "denominator", "rate"},
+				    Checked = if Table.ColumnNames(Headers) = Expected then Headers else error "Unexpected P003 CSV headers",
+				    Nullable = {"rate"},
+				    Blanks = if List.IsEmpty(Nullable) then Checked else Table.ReplaceValue(Checked, "", null, Replacer.ReplaceValue, Nullable),
+				    Typed = Table.TransformColumnTypes(Blanks, {{"source_sha256", type text}, {"numerator", Int64.Type}, {"denominator", Int64.Type}, {"rate", type number}}, "en-US"),
+				    Verified = if Table.RowCount(Typed) = 1 then Typed else error "Unexpected P003 CSV row count"
+				in
+				    Verified
+
+	annotation PBI_ResultType = Table

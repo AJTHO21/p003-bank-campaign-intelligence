@@ -1,0 +1,148 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/reportExtension/1.0.0/schema.json",
+  "name": "extension",
+  "entities": [
+    {
+      "name": "observed_segments",
+      "measures": [
+        {
+          "name": "Executive channel observations",
+          "dataType": "Integer",
+          "expression": "CALCULATE(SUM('observed_segments'[denominator]), KEEPFILTERS('observed_segments'[dimension] = \"contact\"))",
+          "formatString": "#,0",
+          "hidden": true
+        },
+        {
+          "name": "Executive channel subscriptions",
+          "dataType": "Integer",
+          "expression": "CALCULATE(SUM('observed_segments'[numerator]), KEEPFILTERS('observed_segments'[dimension] = \"contact\"))",
+          "formatString": "#,0",
+          "hidden": true
+        }
+      ]
+    },
+    {
+      "name": "previous_outcome",
+      "measures": [
+        {
+          "name": "Executive previous outcome observations",
+          "dataType": "Integer",
+          "expression": "SUM('previous_outcome'[denominator])",
+          "formatString": "#,0",
+          "hidden": true
+        },
+        {
+          "name": "Executive previous outcome subscriptions",
+          "dataType": "Integer",
+          "expression": "SUM('previous_outcome'[numerator])",
+          "formatString": "#,0",
+          "hidden": true
+        }
+      ]
+    },
+    {
+      "name": "comparison_estimates",
+      "measures": [
+        {
+          "name": "Executive crude channel gap",
+          "dataType": "Double",
+          "expression": "CALCULATE(IF(COUNTROWS('comparison_estimates') = 1, SELECTEDVALUE('comparison_estimates'[gap_pp])), KEEPFILTERS('comparison_estimates'[family] = \"channel\"), KEEPFILTERS('comparison_estimates'[method] = \"crude\"), KEEPFILTERS('comparison_estimates'[estimate_type] = \"observed\"))",
+          "formatString": "+0.00\" pp\";-0.00\" pp\";0.00\" pp\"",
+          "hidden": true
+        },
+        {
+          "name": "Channel prior-outcome-standardized gap",
+          "dataType": "Double",
+          "expression": "CALCULATE(IF(COUNTROWS('comparison_estimates') = 1, SELECTEDVALUE('comparison_estimates'[gap_pp])), KEEPFILTERS('comparison_estimates'[family] = \"channel\"), KEEPFILTERS('comparison_estimates'[method] = \"prior_outcome\"), KEEPFILTERS('comparison_estimates'[estimate_type] = \"standardized\"))",
+          "formatString": "+0.00\" pp\";-0.00\" pp\";0.00\" pp\"",
+          "hidden": true
+        },
+        {
+          "name": "Channel calendar-month-standardized gap",
+          "dataType": "Double",
+          "expression": "CALCULATE(IF(COUNTROWS('comparison_estimates') = 1, SELECTEDVALUE('comparison_estimates'[gap_pp])), KEEPFILTERS('comparison_estimates'[family] = \"channel\"), KEEPFILTERS('comparison_estimates'[method] = \"contact_month\"), KEEPFILTERS('comparison_estimates'[estimate_type] = \"standardized\"))",
+          "formatString": "+0.00\" pp\";-0.00\" pp\";0.00\" pp\"",
+          "hidden": true
+        }
+      ]
+    },
+    {
+      "name": "observed_cross_tabs",
+      "measures": [
+        {
+          "name": "Channel stratum observations",
+          "dataType": "Integer",
+          "expression": "SUM('observed_cross_tabs'[denominator])",
+          "formatString": "#,0",
+          "hidden": true
+        },
+        {
+          "name": "Channel stratum subscriptions",
+          "dataType": "Integer",
+          "expression": "SUM('observed_cross_tabs'[numerator])",
+          "formatString": "#,0",
+          "hidden": true
+        }
+      ]
+    },
+    {
+      "name": "campaign_frequency",
+      "measures": [
+        {
+          "name": "Campaign frequency observations",
+          "dataType": "Integer",
+          "expression": "SUM('campaign_frequency'[denominator])",
+          "formatString": "#,0",
+          "hidden": true
+        },
+        {
+          "name": "Campaign frequency subscriptions",
+          "dataType": "Integer",
+          "expression": "SUM('campaign_frequency'[numerator])",
+          "formatString": "#,0",
+          "hidden": true
+        }
+      ]
+    },
+    {
+      "name": "comparison_weights",
+      "measures": [
+        {
+          "name": "Channel month cellular observed rate",
+          "dataType": "Double",
+          "expression": "CALCULATE(IF(COUNTROWS('comparison_weights') = 1, SELECTEDVALUE('comparison_weights'[a_rate])), KEEPFILTERS('comparison_weights'[family] = \"channel\"), KEEPFILTERS('comparison_weights'[method] = \"contact_month\"), KEEPFILTERS('comparison_weights'[included] = TRUE()))",
+          "formatString": "0.00%",
+          "hidden": true
+        },
+        {
+          "name": "Channel month telephone observed rate",
+          "dataType": "Double",
+          "expression": "CALCULATE(IF(COUNTROWS('comparison_weights') = 1, SELECTEDVALUE('comparison_weights'[b_rate])), KEEPFILTERS('comparison_weights'[family] = \"channel\"), KEEPFILTERS('comparison_weights'[method] = \"contact_month\"), KEEPFILTERS('comparison_weights'[included] = TRUE()))",
+          "formatString": "0.00%",
+          "hidden": true
+        },
+        {
+          "name": "Channel month cellular observations",
+          "dataType": "Integer",
+          "expression": "CALCULATE(IF(COUNTROWS('comparison_weights') = 1, SELECTEDVALUE('comparison_weights'[a_n])), KEEPFILTERS('comparison_weights'[family] = \"channel\"), KEEPFILTERS('comparison_weights'[method] = \"contact_month\"), KEEPFILTERS('comparison_weights'[included] = TRUE()))",
+          "formatString": "#,0",
+          "hidden": true
+        },
+        {
+          "name": "Channel month telephone observations",
+          "dataType": "Integer",
+          "expression": "CALCULATE(IF(COUNTROWS('comparison_weights') = 1, SELECTEDVALUE('comparison_weights'[b_n])), KEEPFILTERS('comparison_weights'[family] = \"channel\"), KEEPFILTERS('comparison_weights'[method] = \"contact_month\"), KEEPFILTERS('comparison_weights'[included] = TRUE()))",
+          "formatString": "#,0",
+          "hidden": true
+        },
+        {
+          "name": "Channel excluded December observations",
+          "dataType": "Integer",
+          "expression": "CALCULATE(SUM('comparison_weights'[a_n]) + SUM('comparison_weights'[b_n]), KEEPFILTERS('comparison_weights'[family] = \"channel\"), KEEPFILTERS('comparison_weights'[method] = \"contact_month\"), KEEPFILTERS('comparison_weights'[included] = FALSE()), KEEPFILTERS('comparison_weights'[stratum] = \"dec\"))",
+          "formatString": "#,0",
+          "hidden": true
+        }
+      ]
+    }
+  ]
+}

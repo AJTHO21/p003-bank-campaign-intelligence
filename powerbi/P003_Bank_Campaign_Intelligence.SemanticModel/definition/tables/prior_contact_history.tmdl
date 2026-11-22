@@ -1,0 +1,71 @@
+table prior_contact_history
+	lineageTag: 7f704e5a-00a3-5184-a5c7-c04a2792c872
+
+	measure 'prior_contact_history observed rate' = DIVIDE(SUM(prior_contact_history[numerator]), SUM(prior_contact_history[denominator]))
+		formatString: 0.00%
+		lineageTag: 63563812-bc14-52bd-841a-dc23f4d15f76
+
+	column source_sha256
+		dataType: string
+		lineageTag: f545165a-7688-5e1b-b16f-60779679093f
+		summarizeBy: none
+		sourceColumn: source_sha256
+
+	column poutcome
+		dataType: string
+		lineageTag: 548ba36e-917a-597b-a88c-cd2efb7ca11d
+		summarizeBy: none
+		sourceColumn: poutcome
+
+	column recorded_prior_contacts
+		dataType: boolean
+		lineageTag: a1ea0538-8367-5650-82a9-cad03586fb3d
+		summarizeBy: none
+		sourceColumn: recorded_prior_contacts
+
+	column pdays_sentinel
+		dataType: boolean
+		lineageTag: 675d812e-25bb-574a-b439-6d12203ab1fe
+		summarizeBy: none
+		sourceColumn: pdays_sentinel
+
+	column history_disagreement
+		dataType: boolean
+		lineageTag: 365925be-0a86-5874-96c3-65f3389491c0
+		summarizeBy: none
+		sourceColumn: history_disagreement
+
+	column numerator
+		dataType: int64
+		lineageTag: 85b1bc0f-21dd-5715-8a26-4dac076653e3
+		summarizeBy: none
+		sourceColumn: numerator
+
+	column denominator
+		dataType: int64
+		lineageTag: 89f42c4f-0242-548f-8ccf-b1d94df9df6c
+		summarizeBy: none
+		sourceColumn: denominator
+
+	column rate
+		dataType: double
+		lineageTag: 8df1a01b-ac8d-54dd-95f5-9b4193881946
+		summarizeBy: none
+		sourceColumn: rate
+
+	partition prior_contact_history = m
+		mode: import
+		source =
+				let
+				    Parsed = Csv.Document(File.Contents(P003CsvFolder & "\prior_contact_history.csv"), [Delimiter=",", Encoding=65001, QuoteStyle=QuoteStyle.Csv]),
+				    Headers = Table.PromoteHeaders(Parsed, [PromoteAllScalars=true]),
+				    Expected = {"source_sha256", "poutcome", "recorded_prior_contacts", "pdays_sentinel", "history_disagreement", "numerator", "denominator", "rate"},
+				    Checked = if Table.ColumnNames(Headers) = Expected then Headers else error "Unexpected P003 CSV headers",
+				    Nullable = {"rate"},
+				    Blanks = if List.IsEmpty(Nullable) then Checked else Table.ReplaceValue(Checked, "", null, Replacer.ReplaceValue, Nullable),
+				    Typed = Table.TransformColumnTypes(Blanks, {{"source_sha256", type text}, {"poutcome", type text}, {"recorded_prior_contacts", type logical}, {"pdays_sentinel", type logical}, {"history_disagreement", type logical}, {"numerator", Int64.Type}, {"denominator", Int64.Type}, {"rate", type number}}, "en-US"),
+				    Verified = if Table.RowCount(Typed) = 4 then Typed else error "Unexpected P003 CSV row count"
+				in
+				    Verified
+
+	annotation PBI_ResultType = Table

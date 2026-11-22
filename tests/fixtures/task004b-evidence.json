@@ -1,0 +1,11 @@
+{
+  "baseline_pct": "11.27",
+  "channel_pct": {"cellular": "14.74", "telephone": "5.23"},
+  "prior_outcome_pct": {"success": "65.11", "failure": "14.23", "nonexistent": "8.83"},
+  "prior_failure": {"sentinel": [532, 4110], "non_sentinel": [73, 142]},
+  "gap_pp": {
+    "month_standardized": "31.10",
+    "seven_month_sensitivity": "34.26",
+    "frequency_standardized": "37.97"
+  }
+}

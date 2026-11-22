@@ -1,0 +1,25 @@
+model Model
+	culture: en-US
+	defaultPowerBIDataSourceVersion: powerBI_V3
+	sourceQueryCulture: en-US
+	valueFilterBehavior: independent
+	discourageImplicitMeasures
+
+annotation PBI_ProTooling = ["DevMode"]
+
+annotation __PBI_TimeIntelligenceEnabled = 0
+
+annotation PBI_QueryOrder = ["P003CsvFolder", "campaign_frequency", "comparison_estimates", "comparison_weights", "executive_baseline", "non_sentinel_days", "observed_cross_tabs", "observed_segments", "previous_outcome", "prior_contact_history", "prior_failure_strata", "segment_estimates", "segment_weights"]
+
+ref table campaign_frequency
+ref table comparison_estimates
+ref table comparison_weights
+ref table executive_baseline
+ref table non_sentinel_days
+ref table observed_cross_tabs
+ref table observed_segments
+ref table previous_outcome
+ref table prior_contact_history
+ref table prior_failure_strata
+ref table segment_estimates
+ref table segment_weights

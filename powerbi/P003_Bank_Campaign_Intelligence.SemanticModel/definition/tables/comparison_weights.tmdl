@@ -1,0 +1,141 @@
+table comparison_weights
+	lineageTag: 3b9b01be-295d-5b29-b345-a7347f04634d
+
+	column source_sha256
+		dataType: string
+		lineageTag: 51619008-28fd-566a-8733-aff416c1c97b
+		summarizeBy: none
+		sourceColumn: source_sha256
+
+	column family
+		dataType: string
+		lineageTag: fafc5a70-7117-50e0-a720-fdf20611efa5
+		summarizeBy: none
+		sourceColumn: family
+
+	column method
+		dataType: string
+		lineageTag: beb995ca-a662-521a-a06b-292dad089613
+		summarizeBy: none
+		sourceColumn: method
+
+	column stratum
+		dataType: string
+		lineageTag: 2dd3485a-d8bb-5bd6-b3bf-4c7224ca9472
+		summarizeBy: none
+		sourceColumn: stratum
+		sortByColumn: calendar_month_order
+
+	column included
+		dataType: boolean
+		lineageTag: bd3bc293-0df4-53c0-a8cc-10615466ec5f
+		summarizeBy: none
+		sourceColumn: included
+
+	column minimum_per_group
+		dataType: int64
+		lineageTag: 0015a3d0-c675-5aa3-af06-166c11f89086
+		summarizeBy: none
+		sourceColumn: minimum_per_group
+
+	column a_sparse
+		dataType: boolean
+		lineageTag: 69d6468e-208e-510a-8ed4-54ac1f325d7b
+		summarizeBy: none
+		sourceColumn: a_sparse
+
+	column b_sparse
+		dataType: boolean
+		lineageTag: 0dda4456-c976-5f4e-8945-54c20231fc18
+		summarizeBy: none
+		sourceColumn: b_sparse
+
+	column a_yes
+		dataType: int64
+		lineageTag: 8d105ccd-6832-5ca5-8e98-60de4d2c0619
+		summarizeBy: none
+		sourceColumn: a_yes
+
+	column a_n
+		dataType: int64
+		lineageTag: 44bf8366-0988-51a3-9f0f-9796dba429f3
+		summarizeBy: none
+		sourceColumn: a_n
+
+	column b_yes
+		dataType: int64
+		lineageTag: ee1befd3-77e0-52be-991c-0220d25b3b0a
+		summarizeBy: none
+		sourceColumn: b_yes
+
+	column b_n
+		dataType: int64
+		lineageTag: 654ee146-f959-5485-8bd2-78572fc1669b
+		summarizeBy: none
+		sourceColumn: b_n
+
+	column a_rate
+		dataType: double
+		lineageTag: 042d4781-55ae-5010-ab75-3355f712b203
+		summarizeBy: none
+		sourceColumn: a_rate
+
+	column b_rate
+		dataType: double
+		lineageTag: dc0ff09c-6383-5ea2-85c1-78b467907a53
+		summarizeBy: none
+		sourceColumn: b_rate
+
+	column weight_numerator
+		dataType: int64
+		lineageTag: 117fa644-4a2c-5578-aaa4-129c1242c699
+		summarizeBy: none
+		sourceColumn: weight_numerator
+
+	column weight_denominator
+		dataType: int64
+		lineageTag: 2b63748b-7f99-539d-a184-85abf89ba2f7
+		summarizeBy: none
+		sourceColumn: weight_denominator
+
+	column weight
+		dataType: double
+		lineageTag: 8c5e8025-1bb1-5f2e-9b87-6e1e152ffaf1
+		summarizeBy: none
+		sourceColumn: weight
+
+	column calendar_month_label
+		dataType: string
+		lineageTag: 85d051cb-513d-5727-a91e-34965f6b2226
+		summarizeBy: none
+		sourceColumn: calendar_month_label
+		sortByColumn: calendar_month_order
+
+	column calendar_month_order
+		dataType: int64
+		lineageTag: 92631a8f-a621-5569-9a2d-d6ce71a6250e
+		summarizeBy: none
+		sourceColumn: calendar_month_order
+		formatString: 0
+		isHidden
+
+	partition comparison_weights = m
+		mode: import
+		source =
+				let
+				    Parsed = Csv.Document(File.Contents(P003CsvFolder & "\comparison_weights.csv"), [Delimiter=",", Encoding=65001, QuoteStyle=QuoteStyle.Csv]),
+				    Headers = Table.PromoteHeaders(Parsed, [PromoteAllScalars=true]),
+				    Expected = {"source_sha256", "family", "method", "stratum", "included", "minimum_per_group", "a_sparse", "b_sparse", "a_yes", "a_n", "b_yes", "b_n", "a_rate", "b_rate", "weight_numerator", "weight_denominator", "weight"},
+				    Checked = if Table.ColumnNames(Headers) = Expected then Headers else error "Unexpected P003 CSV headers",
+				    Nullable = {"a_rate", "b_rate"},
+				    Blanks = if List.IsEmpty(Nullable) then Checked else Table.ReplaceValue(Checked, "", null, Replacer.ReplaceValue, Nullable),
+				    Typed = Table.TransformColumnTypes(Blanks, {{"source_sha256", type text}, {"family", type text}, {"method", type text}, {"stratum", type text}, {"included", type logical}, {"minimum_per_group", Int64.Type}, {"a_sparse", type logical}, {"b_sparse", type logical}, {"a_yes", Int64.Type}, {"a_n", Int64.Type}, {"b_yes", Int64.Type}, {"b_n", Int64.Type}, {"a_rate", type number}, {"b_rate", type number}, {"weight_numerator", Int64.Type}, {"weight_denominator", Int64.Type}, {"weight", type number}}, "en-US"),
+				    Verified = if Table.RowCount(Typed) = 37 then Typed else error "Unexpected P003 CSV row count",
+				    MonthOrder = [jan = 1, feb = 2, mar = 3, apr = 4, may = 5, jun = 6, jul = 7, aug = 8, sep = 9, oct = 10, nov = 11, dec = 12],
+				    WithMonthOrder = Table.AddColumn(Verified, "calendar_month_order", each Record.FieldOrDefault(MonthOrder, [stratum], null), Int64.Type),
+				    MonthLabels = [mar = "Mar", apr = "Apr", may = "May", jun = "Jun", jul = "Jul", aug = "Aug", sep = "Sep", oct = "Oct", nov = "Nov"],
+				    WithMonthLabel = Table.AddColumn(WithMonthOrder, "calendar_month_label", each Record.FieldOrDefault(MonthLabels, [stratum], [stratum]), type text)
+				in
+				    WithMonthLabel
+
+	annotation PBI_ResultType = Table

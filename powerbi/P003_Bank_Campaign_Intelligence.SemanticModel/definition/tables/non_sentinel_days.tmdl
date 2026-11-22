@@ -1,0 +1,65 @@
+table non_sentinel_days
+	lineageTag: cb90bbc6-5bbf-5e90-9f22-658d267195c6
+
+	measure 'non_sentinel_days observed rate' = IF(HASONEVALUE(non_sentinel_days[scope]), DIVIDE(SUM(non_sentinel_days[numerator]), SUM(non_sentinel_days[denominator])))
+		formatString: 0.00%
+		lineageTag: 4180b5ec-419e-5d48-9c41-04df73f420c3
+
+	column source_sha256
+		dataType: string
+		lineageTag: 276c0b1c-76ca-5eb6-b862-d3e328bf78a4
+		summarizeBy: none
+		sourceColumn: source_sha256
+
+	column scope
+		dataType: string
+		lineageTag: b358efa5-15b5-594e-a893-bd3ef0aa2bcb
+		summarizeBy: none
+		sourceColumn: scope
+
+	column poutcome
+		dataType: string
+		lineageTag: 55ca75aa-a640-530e-8cb5-0c25961b2282
+		summarizeBy: none
+		sourceColumn: poutcome
+
+	column pdays
+		dataType: int64
+		lineageTag: 1d0af998-4def-58a1-8517-5ff490ba86c4
+		summarizeBy: none
+		sourceColumn: pdays
+
+	column numerator
+		dataType: int64
+		lineageTag: decf6502-9dad-57e6-a18c-0ddb837378ad
+		summarizeBy: none
+		sourceColumn: numerator
+
+	column denominator
+		dataType: int64
+		lineageTag: 64e25ec8-811c-5c5e-811a-aefeef0292be
+		summarizeBy: none
+		sourceColumn: denominator
+
+	column rate
+		dataType: double
+		lineageTag: c0d756d2-7ea1-5fae-a592-0c2cf15cbb3a
+		summarizeBy: none
+		sourceColumn: rate
+
+	partition non_sentinel_days = m
+		mode: import
+		source =
+				let
+				    Parsed = Csv.Document(File.Contents(P003CsvFolder & "\non_sentinel_days.csv"), [Delimiter=",", Encoding=65001, QuoteStyle=QuoteStyle.Csv]),
+				    Headers = Table.PromoteHeaders(Parsed, [PromoteAllScalars=true]),
+				    Expected = {"source_sha256", "scope", "poutcome", "pdays", "numerator", "denominator", "rate"},
+				    Checked = if Table.ColumnNames(Headers) = Expected then Headers else error "Unexpected P003 CSV headers",
+				    Nullable = {"poutcome", "pdays", "rate"},
+				    Blanks = if List.IsEmpty(Nullable) then Checked else Table.ReplaceValue(Checked, "", null, Replacer.ReplaceValue, Nullable),
+				    Typed = Table.TransformColumnTypes(Blanks, {{"source_sha256", type text}, {"scope", type text}, {"poutcome", type text}, {"pdays", Int64.Type}, {"numerator", Int64.Type}, {"denominator", Int64.Type}, {"rate", type number}}, "en-US"),
+				    Verified = if Table.RowCount(Typed) = 72 then Typed else error "Unexpected P003 CSV row count"
+				in
+				    Verified
+
+	annotation PBI_ResultType = Table

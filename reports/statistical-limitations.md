@@ -1,0 +1,8 @@
+# Statistical limitations
+
+- The results are descriptive associations within historical outreach records from one Portuguese bank, spanning 2008–2010. Selection into outreach, channel assignment, follow-up and stopping decisions can change the composition of the observed groups.
+- The CSV has no verified customer, call or campaign identifiers. Observations may be dependent or refer to repeat customers. The exact repeats are retained. The reported percentages are observation rates. No confidence intervals or hypothesis tests were calculated.
+- The sentinel has a documented source meaning of no previous contact, but 4,110 sentinel rows also record positive prior contacts and a prior failure. Sentinel status is a distinction in the recorded data. Its association may reflect recording practices, selection or other unmeasured differences.
+- Month reflects the realized last contact and repeats across years. Exact dates and separate year effects are unavailable. Campaign frequency includes the realized last contact and may reflect follow-up or stopping decisions. Group composition within each stratum may still differ.
+- Pooled weighting puts both groups on the same distribution for one variable at a time. The month and frequency results are separate analyses. No joint adjustment was performed. The restricted comparison also changes the reference population. Sparse cells, especially December's one non-sentinel row, can shift the estimates.
+- These results provide no evidence about the effect of interventions, future targeting performance, campaign economics or ROI. Duration was excluded from the exploration, and predictor availability for pre-call use remains unverified.

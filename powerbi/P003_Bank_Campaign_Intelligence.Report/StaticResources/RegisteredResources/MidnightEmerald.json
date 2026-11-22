@@ -1,0 +1,16 @@
+{
+  "name": "Midnight & Emerald",
+  "dataColors": [
+    "#177F78",
+    "#14283F",
+    "#71889B",
+    "#D5A34A",
+    "#C76B63"
+  ],
+  "background": "#F5F7FA",
+  "foreground": "#14283F",
+  "tableAccent": "#177F78",
+  "good": "#177F78",
+  "neutral": "#D5A34A",
+  "bad": "#C76B63"
+}
