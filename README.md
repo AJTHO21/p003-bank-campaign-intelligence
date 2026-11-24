@@ -1,60 +1,179 @@
-# P003 Bank Campaign Intelligence
+# Bank Campaign Intelligence
+### Turning Campaign Data into Better Marketing Decisions
 
-A two-page Power BI report on historical term-deposit outreach at a Portuguese bank. The business question is whether the observed subscription-rate gap between cellular and telephone contacts remains after comparing the channels under a shared mix of previous campaign outcomes or supported calendar months.
+**Banking Analytics & Business Intelligence**
 
-**Tools** — PostgreSQL for staging and reconciliation, SQL for reporting and standardization, Python for snapshot verification and deterministic exports, and Power BI for the semantic model and report.
+*Self-directed analytical consulting simulation using the publicly available UCI Bank Marketing dataset.*
 
-## Key findings
+**[View the Executive Case Study (PDF)](docs/P003_Bank_Campaign_Executive_Case_Study.pdf)**
 
-| Comparison | Validated result |
+## The Business Challenge
+
+Banks invest time and resources contacting prospective customers about financial products. But when one contact channel appears more successful than another, the explanation isn't always straightforward.
+
+Higher subscription rates might reflect the communication channel, previous customer interactions, campaign timing, or differences in the groups being contacted.
+
+**The objective:** Evaluate historical marketing performance, investigate the factors associated with subscription outcomes, and help marketing managers make more informed campaign decisions.
+
+## The Investigation
+
+I analyzed **41,188 historical outreach observations** from a Portuguese bank, covering campaigns conducted between 2008 and 2010.
+
+The investigation focused on three business questions:
+
+1. How successfully did the bank's outreach efforts generate term-deposit subscriptions?
+2. Did the apparent performance difference between cellular and telephone contacts persist when comparing groups more fairly?
+3. Which customer-history patterns and data-quality issues should managers understand before making campaign decisions?
+
+I developed a reproducible analytical workflow and a two-page Power BI report to investigate these questions.
+
+## What the Analysis Revealed
+
+### 1. Campaign performance varied substantially by contact channel
+
+Across the historical records, **4,640 of 41,188 observations resulted in subscriptions**, an overall rate of **11.27%**.
+
+| Recorded contact channel | Subscriptions | Observations | Subscription rate |
+|---|---:|---:|---:|
+| Cellular | 3,853 | 26,144 | **14.74%** |
+| Telephone | 787 | 15,044 | **5.23%** |
+
+The observed difference was **9.51 percentage points** in favor of cellular.
+
+**Why it matters:** A substantial difference deserves investigation, but an initial comparison alone is not enough to justify changing a marketing strategy.
+
+### 2. A more careful comparison changed the interpretation
+
+I examined whether the observed channel gap persisted after separately accounting for previous campaign outcomes and calendar-month composition.
+
+| Comparison | Cellular-minus-telephone gap |
 |---|---:|
-| Overall observed subscription rate | **11.27%** · 4,640 / 41,188 observations |
-| Observed cellular rate | **14.74%** · 3,853 / 26,144 observations |
-| Observed telephone rate | **5.23%** · 787 / 15,044 observations |
-| Observed cellular-minus-telephone gap | **+9.51 percentage points** |
-| Gap standardized by previous outcome | **+6.43 percentage points** |
-| Gap standardized by supported calendar month | **+8.04 percentage points** |
+| Initial observed comparison | **+9.51 percentage points** |
+| Compared under a common previous-outcome mix | **+6.43 percentage points** |
+| Compared under a common supported-month mix | **+8.04 percentage points** |
 
-The month comparison uses nine pooled calendar months, March through November. December is excluded from that standardization for both channels because the telephone cell falls below the support threshold. The exclusion covers **182 observations** (149 cellular and 33 telephone).
+The gap became smaller under both comparisons but remained positive.
 
-## Dashboard previews
+**Why it matters:** Comparing groups under shared conditions provides a more informative description of performance. However, the findings do not prove that selecting cellular contact would cause more subscriptions.
+
+The two adjusted comparisons address different factors independently. They are not a combined adjustment for all potential differences.
+
+### 3. Previous campaign history revealed important differences
+
+Recorded subscription rates differed considerably by previous campaign outcome:
+
+- **Previous success:** 65.11%
+- **Previous failure:** 14.23%
+- **No previous outcome recorded:** 8.83%
+
+**Why it matters:** Historical interaction records may help explain differences in campaign results. Before using them operationally, a bank would need to verify data quality, decision-time availability, and appropriate customer treatment.
+
+The audit also identified **4,110 observations** where a special previous-contact code appeared alongside records of positive prior contacts and a previous failure. These inconsistencies warrant investigation rather than automatic correction.
+
+## Recommended Business Actions
+
+| Priority | Recommendation | Business purpose |
+|---|---|---|
+| 1 | Investigate channel performance within comparable outreach groups | Avoid misleading channel comparisons |
+| 2 | Improve collection of customer, campaign, and contact-history identifiers | Support more reliable measurement and follow-up |
+| 3 | Validate conflicting campaign-history fields | Reduce ambiguity in reporting and operational decisions |
+| 4 | Evaluate proposed outreach changes through a controlled pilot | Test whether a strategy actually improves outcomes |
+| 5 | Capture campaign costs and measurable financial outcomes | Enable future profitability and return-on-investment analysis |
+
+**Central takeaway:** Good campaign intelligence is not simply identifying which group has the highest subscription rate. It is understanding what the available evidence supports, what remains uncertain, and which decisions require further testing.
+
+These recommendations are proposed next steps, not completed business interventions.
+
+## Power BI Dashboard
+
+A two-page Power BI report presents the investigation through executive summaries and detailed campaign comparisons.
 
 ### Executive Campaign Overview
 
-![Executive Campaign Overview showing subscription KPIs, observed rates by channel and prior outcome, and channel volumes](assets/P003_Executive_Overview.png)
+![Executive Campaign Overview](assets/P003_Executive_Overview.png)
+
+Provides a management-level view of subscription performance, contact-channel rates, prior campaign outcomes, and supporting observation counts.
 
 ### Channel & Campaign Performance
 
-![Channel and Campaign Performance showing observed and standardized channel gaps, March–November comparisons, contact frequency, and the December exclusion](assets/P003_Channel_Performance.png)
+![Channel and Campaign Performance](assets/P003_Channel_Performance.png)
 
-Both pages loaded and refreshed in Power BI Desktop. The [portfolio case study](docs/portfolio-case-study.md) describes the reporting choices and findings in more detail.
+Explores channel comparisons, calendar patterns, campaign contact frequency, and standardized results with visible sample-support limitations.
 
-## Methodology and quality assurance
+Both dashboard pages were loaded and refreshed in Power BI Desktop during project validation.
 
-The workflow fingerprints the UCI source snapshot, reconciles typed PostgreSQL records to the selected CSV, and exports **12 aggregate reporting tables with 383 summary rows**. Observed rates use explicit subscription counts and observation denominators. Each standardization uses its own shared reference mix across the two channels. Python verifies checksums and generates report definitions deterministically, with guarded atomic writes. Offline Power BI validation checks **29 schema-bearing documents**, model bindings, and report definitions. See the [analytical contract](docs/analytical-contract.md), [reporting layer](docs/powerbi-reporting-layer.md), and [export QA](reports/powerbi-export-qa.md).
+## Project Deliverables
 
-## Statistical limitations
+This project demonstrates an analytical engagement from source-data verification through executive reporting.
 
-The dataset covers selected outreach from one bank in 2008–2010. The unit is a campaign observation, and repeat customers cannot be identified. Channel reflects the realized last contact. The month and prior-outcome standardizations address separate composition differences and do not establish causality, predictive performance, or ROI. Calendar months are pooled categories across years. See the [statistical limitations](reports/statistical-limitations.md).
+- **Power BI Report:** Two pages presenting campaign performance and investigative comparisons.
+- **Executive Case Study:** Business-oriented explanation of findings, implications, and recommendations.
+- **PostgreSQL Reporting Layer:** Structured data staging and analytical aggregation.
+- **Python Verification Workflow:** Independent reconciliation, reproducible exports, and quality controls.
+- **Analytical Documentation:** Detailed methodology, support thresholds, limitations, and source attribution.
 
-## Reproduce locally
+### Explore the Supporting Evidence
 
-The screenshots, definitions, code, and QA records can be reviewed from this checkout. Raw snapshot copies, reporting CSVs, and Desktop caches are kept outside Git. A fresh checkout cannot refresh the PBIP or run the full Power BI checks until the pinned reporting bundle is locally available.
+- [Detailed Portfolio Case Study](docs/portfolio-case-study.md)
+- [Customer Segmentation Findings](reports/segmentation-findings.md)
+- [Complete Analytical Tables](reports/segmentation-tables.md)
+- [Statistical Limitations](reports/statistical-limitations.md)
+- [Power BI Reporting Definitions](docs/powerbi-reporting-layer.md)
 
-1. In a Linux or WSL checkout, run `python3 scripts/acquire.py` with `curl` available. The script obtains the public UCI archive and creates or verifies the local snapshot. See [provenance](docs/provenance.md).
-2. Stage the snapshot using a local PostgreSQL server and the [ingestion guide](docs/postgresql-ingestion.md). From an authorized reporting connection, run `python3 scripts/export_powerbi.py` to write the local content-addressed export. The Power BI build requires the exact pinned bundle and refuses a mismatch. See the [export instructions](reports/powerbi-export-qa.md#live-wsl-reproduction).
-3. With Python's `jsonschema` and `referencing` packages installed, run the following from the repository root. The build verifies the pinned bundle and installs the ignored local CSV copy if needed.
+## Technical Documentation & Quality Assurance
 
-   ```bash
-   python3 powerbi/tools/project.py build
-   python3 powerbi/tools/project.py validate
-   python3 -m unittest discover -s powerbi/tools -v
-   ```
+**Technologies:** PostgreSQL, SQL, Python, Power BI, DAX, PBIP/PBIR, and TMDL.
 
-To refresh in Power BI Desktop, configure `P003CsvFolder` in a separate Desktop copy before opening the PBIP. The public definitions use a machine-neutral placeholder so the checkout stays reproducible. See the [Power BI guide](powerbi/README.md).
+The analytical workflow preserves the verified source snapshot and uses explicit subscription counts and eligible observation denominators.
 
-## Attribution and licensing
+Its reporting layer contains **12 aggregate tables and 383 summary rows**.
 
-- **Dataset:** Moro, S., Rita, P., & Cortez, P. (2014). *Bank Marketing* [Dataset]. UCI Machine Learning Repository, full bank-additional variant. [DOI 10.24432/C5K306](https://doi.org/10.24432/C5K306) · [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) · [Acquisition and provenance](docs/provenance.md).
-- **Original project code:** MIT, copyright © 2026 AJTHO21. [Project license](LICENSE)
-- **Microsoft JSON schemas:** The bundled schemas carry Microsoft's separate MIT notice. [Microsoft notice](powerbi/tools/MICROSOFT-SCHEMAS-LICENSE.txt) · [Upstream schema repository](https://github.com/microsoft/json-schemas)
+Independent Python verification checks source fingerprints, group counts, rates, adjustment weights, exclusions, and reporting outputs. The repository documents successful database regression tests and Power BI project validation.
+
+| Technical resource | Documentation |
+|---|---|
+| Dataset provenance and acquisition | [Source Documentation](docs/provenance.md) |
+| Reporting definitions | [Analytical Contract](docs/analytical-contract.md) |
+| PostgreSQL setup and staging | [Ingestion Guide](docs/postgresql-ingestion.md) |
+| SQL reporting architecture | [Reporting Layer](docs/powerbi-reporting-layer.md) |
+| Analytical verification | [Segmentation QA](reports/segmentation-qa.md) |
+| Export reconciliation | [Power BI Export QA](reports/powerbi-export-qa.md) |
+| Power BI implementation | [Power BI Project Guide](powerbi/README.md) |
+| Dashboard validation | [Power BI Foundation QA](reports/powerbi-foundation-qa.md) |
+
+### Reproducing the Project
+
+The repository contains the analysis code, Power BI project definitions, dashboard previews, verification scripts, and supporting documentation.
+
+To reproduce the analysis, acquire the public source dataset, follow the documented PostgreSQL staging workflow, generate the verified reporting bundle, and configure the Power BI project's local data-folder parameter.
+
+Raw snapshot copies, reporting CSV exports, and Desktop caches are excluded from the public repository. The pinned reporting bundle must be regenerated locally before a fresh Power BI checkout can be refreshed.
+
+Detailed reproduction instructions are available in the [Power BI Project Guide](powerbi/README.md).
+
+## Scope & Limitations
+
+This project uses historical outreach records from one Portuguese bank during **2008–2010**. The findings should not be generalized automatically to present-day banking campaigns.
+
+Important limitations include:
+
+- The unit of analysis is an outreach observation, not a verified unique customer.
+- Customer and campaign identifiers are unavailable, so repeat observations cannot be reliably linked.
+- Contact channel describes the recorded last contact, not a randomly assigned outreach strategy.
+- Previous-outcome and calendar-month standardizations are separate descriptive comparisons, not causal estimates.
+- Calendar months are pooled across years.
+- Small comparison groups are subject to documented support requirements. December's 182 observations are excluded from the month-standardized channel comparison, although they remain in the overall results.
+- Campaign costs and financial returns were not provided, so realized profitability and ROI cannot be calculated.
+- No implemented intervention, measurable business improvement, or predictive performance is claimed.
+
+**This is a self-directed portfolio project, not a completed commercial engagement.** The dashboards, analysis, and recommendations demonstrate professional analytical capabilities using historical public data.
+
+## Data Source & Attribution
+
+Moro, S., Rita, P., & Cortez, P. (2014). *Bank Marketing*. UCI Machine Learning Repository.
+
+- [Dataset DOI: 10.24432/C5K306](https://doi.org/10.24432/C5K306)
+- [Dataset License: CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)
+- [Dataset Provenance](docs/provenance.md)
+
+Original project code is distributed under the repository's [MIT License](LICENSE). Bundled Microsoft JSON schemas retain their separate licensing terms, documented in the [Microsoft notice](powerbi/tools/MICROSOFT-SCHEMAS-LICENSE.txt).
